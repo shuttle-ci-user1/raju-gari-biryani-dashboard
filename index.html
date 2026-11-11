@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Raju Gari Biryani — Hyderabad · Day-Level Performance Tracker</title>
+<style>
+  :root{
+    --bg:#F6F7F9; --card:#FFFFFF; --ink:#1F2430; --ink2:#5B6472; --line:#E3E7ED;
+    --swiggy:#FC8019; --toing:#7C4DFF; --total:#1A73E8;
+    --up:#0F9D58; --down:#D23F27; --flat:#5F6368; --accent:#00897B;
+    --th:#F0F2F5;
+  }
+  @media(prefers-color-scheme:dark){
+    :root{--bg:#12151C;--card:#1A1F29;--ink:#E8ECF2;--ink2:#9AA4B2;--line:#2A3140;
+      --th:#212736;--up:#2DBE8A;--down:#FF7043;}
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--ink);padding:24px;font-size:14px}
+  .wrap{max-width:1500px;margin:0 auto}
+  h1{font-size:22px;font-weight:700;letter-spacing:-.02em}
+  .sub{color:var(--ink2);font-size:13px;margin-top:4px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:18px;margin-top:16px}
+  .card h2{font-size:15px;font-weight:600;margin-bottom:12px}
+  .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
+  .kpi{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px}
+  .kpi .lbl{font-size:11px;font-weight:600;color:var(--ink2);text-transform:uppercase;letter-spacing:.05em}
+  .kpi .val{font-size:22px;font-weight:700;margin-top:6px}
+  .kpi .chip-row{margin-top:6px}
+  .chip{display:inline-block;font-size:11px;font-weight:600;padding:2px 7px;border-radius:20px}
+  .chip.up{color:var(--up)} .chip.down{color:var(--down)} .chip.flat{color:var(--flat)} .chip.na{color:var(--flat);opacity:.6}
+  table{width:100%;border-collapse:collapse}
+  th,td{padding:7px 10px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap}
+  th{background:var(--th);font-size:11px;font-weight:600;color:var(--ink2);text-transform:uppercase;letter-spacing:.04em;position:sticky;top:0}
+  td.dt{text-align:left;font-weight:600}
+  .wd{display:inline-block;margin-left:6px;font-size:10px;color:var(--ink2);font-weight:500}
+  td.num .sub{margin-top:2px}
+  tr:hover td{background:rgba(26,115,232,.04)}
+  .thead-sw{color:var(--swiggy)} .thead-tg{color:var(--toing)} .thead-tt{color:var(--total)}
+  .colspan-h{background:var(--th);font-size:10px;text-align:center;font-weight:700;letter-spacing:.08em}
+  .tbl-scroll{overflow:auto;max-height:520px;border-radius:8px;border:1px solid var(--line)}
+  .coupon-wrap{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  .coupon-col .coupon-h{font-size:11px;font-weight:700;padding:6px 10px;border-radius:6px;color:#fff;display:inline-block;margin-bottom:8px}
+  .coupon-h.swiggy{background:var(--swiggy)} .coupon-h.toing{background:var(--toing)}
+  .coupon-t th,td{text-align:left} .coupon-t td.num{text-align:right}
+  .coupon-t .rank{color:var(--ink2);width:20px}
+  .coupon-t .cpn{font-family:Consolas,monospace;font-weight:600}
+  .empty{color:var(--ink2);text-align:center;font-style:italic}
+  .day-coupons{border-top:1px solid var(--line);padding-top:10px;margin-top:10px}
+  .day-coupons h3{font-size:12px;color:var(--ink2);margin-bottom:8px;font-weight:600}
+  select{padding:8px 12px;border-radius:8px;border:1px solid var(--line);background:var(--card);color:var(--ink);font-size:14px;min-width:320px}
+  .controls{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+  .legend{display:flex;gap:14px;font-size:12px;color:var(--ink2);margin-left:auto}
+  .legend span::before{content:'';display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+  .legend .l-sw::before{background:var(--swiggy)} .legend .l-tg::before{background:var(--toing)} .legend .l-tt::before{background:var(--total)}
+  .chart-c{width:100%;height:280px}
+  .chart-card{margin-top:16px}
+  .note{font-size:12px;color:var(--ink2);margin-top:10px;line-height:1.5}
+  .view-tabs{display:flex;gap:8px;margin-top:14px}
+  .tab{padding:8px 16px;border-radius:20px;border:1px solid var(--line);background:var(--card);color:var(--ink2);cursor:pointer;font-size:13px;font-weight:600}
+  .tab.active{background:var(--total);color:#fff;border-color:var(--total)}
+  .outlet-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:10px}
+  .outlet-btn{text-align:left;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--card);cursor:pointer}
+  .outlet-btn:hover{border-color:var(--total)}
+  .outlet-btn .n{font-weight:600;font-size:13px}
+  .outlet-btn .a{font-size:11px;color:var(--ink2);margin-top:2px}
+  .outlet-btn .s{font-size:11px;color:var(--ink2);margin-top:4px}
+  footer{margin-top:24px;color:var(--ink2);font-size:11px;text-align:center}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>🍛 Raju Gari Biryani — Hyderabad · Day-Level Performance Tracker</h1>
+  <div class="sub">27 live outlets · Nov 1–10, 2026 · Growth = vs same day last week · Split: Swiggy vs Toing</div>
+
+  <div class="view-tabs">
+    <button class="tab active" data-view="brand" onclick="setView('brand')">Brand Overview</button>
+    <button class="tab" data-view="outlet" onclick="setView('outlet')">By Outlet (RID)</button>
+  </div>
+
+  <div id="view-brand">
+    <div class="card">
+      <h2>Latest Day Snapshot — <span id="latest-date"></span></h2>
+      <div class="kpis" id="brand-kpis"></div>
+    </div>
+
+    <div class="card chart-card">
+      <h2>Orders &amp; GMV Trend (Total = Swiggy + Toing)</h2>
+      <div class="legend"><span class="l-sw">Swiggy</span><span class="l-tg">Toing</span><span class="l-tt">Total</span></div>
+      <div id="chart-orders" class="chart-c"></div>
+      <div id="chart-gmv" class="chart-c"></div>
+    </div>
+
+    <div class="card">
+      <h2>Day-Level Detail — all metrics × channel, with WoW growth</h2>
+      <div class="tbl-scroll" id="brand-table"></div>
+    </div>
+
+    <div class="card">
+      <h2>Top 7 Discount Coupon Burn — by day</h2>
+      <div class="controls">
+        <label>Day: <select id="coupon-day" onchange="renderCoupons()"></select></label>
+      </div>
+      <div id="brand-coupons" style="margin-top:14px"></div>
+      <div class="note">Burn = total coupon discount on completed orders (all funding sources: restaurant / Swiggy / alliance-co-funded). CBA is a Swiggy Food-app ads format; Toing has no CBA placements in this period.</div>
+    </div>
+  </div>
+
+  <div id="view-outlet" style="display:none">
+    <div class="card">
+      <h2>Select Outlet</h2>
+      <div class="outlet-grid" id="outlet-grid"></div>
+    </div>
+    <div id="outlet-detail" style="display:none">
+      <div class="card">
+        <h2 id="od-title"></h2>
+        <div class="kpis" id="od-kpis"></div>
+      </div>
+      <div class="card">
+        <h2>Day-Level Detail</h2>
+        <div class="tbl-scroll" id="od-table"></div>
+      </div>
+      <div class="card">
+        <h2>Top 7 Discount Coupon Burn — by day</h2>
+        <div class="controls"><label>Day: <select id="od-coupon-day" onchange="renderOdCoupons()"></select></label></div>
+        <div id="od-coupons" style="margin-top:14px"></div>
+      </div>
+    </div>
+  </div>
+
+  <footer>Raju Gari Biryani (Hyderabad) · Parent ID 165947 · 27 enabled outlets · Data: Snowflake (SUPPLY_CENTRAL_FACT_TABLE_RX_DT_LEVEL + _TOING, CP_ORDER_OFFER) · Generated __PULLED_AT__</footer>
+</div>
+
+<script>
+const DATA = __PAYLOAD__;
+
+const fmt = (v, kind) => {
+  if (v === null || v === undefined) return '–';
+  if (kind === 'int') return v.toLocaleString('en-IN', {maximumFractionDigits: 0});
+  if (kind === 'inr') return '₹' + v.toLocaleString('en-IN', {maximumFractionDigits: 0});
+  if (kind === 'inr1') return '₹' + v.toLocaleString('en-IN', {minimumFractionDigits: 1, maximumFractionDigits: 1});
+  return String(v);
+};
+const pct = v => {
+  if (v === null || v === undefined) return '<span class="chip na">n/a</span>';
+  const cls = v > 0.05 ? 'up' : (v < -0.05 ? 'down' : 'flat');
+  const arr = v > 0.05 ? '▲' : (v < -0.05 ? '▼' : '≈');
+  return `<span class="chip ${cls}">${arr} ${v.toFixed(1)}%</span>`;
+};
+const WD = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+
+function kpiCard(lbl, val, wow) {
+  return `<div class="kpi"><div class="lbl">${lbl}</div><div class="val">${val}</div><div class="chip-row">${pct(wow)}</div></div>`;
+}
+
+function renderKpis(container, day, prefix) {
+  const el = document.getElementById(container);
+  let h = '';
+  for (const m of DATA.metrics) {
+    h += kpiCard(m.label + ' · ' + prefix, fmt(day.m[m.key], m.kind), day.wow[m.key]);
+  }
+  el.innerHTML = h;
+}
+
+function renderTable(container, days) {
+  const el = document.getElementById(container);
+  let h = '<table><thead><tr>';
+  h += '<th>Date</th>';
+  for (const m of DATA.metrics) {
+    h += `<th colspan="3" class="colspan-h ${m.key}">${m.label}</th>`;
+  }
+  h += '</tr><tr><th></th>';
+  for (const m of DATA.metrics) {
+    h += `<th class="thead-sw">S</th><th class="thead-tg">T</th><th class="thead-tt">Tot</th>`;
+  }
+  h += '</tr></thead><tbody>';
+  for (let i = days.length - 1; i >= 0; i--) {
+    const d = days[i];
+    const wd = WD[new Date(d.date).getUTCDay()];
+    h += `<tr><td class="dt">${d.date}<span class="wd">${wd}</span></td>`;
+    for (const m of DATA.metrics) {
+      for (const ch of ['swiggy','toing','total']) {
+        h += `<td class="num">${fmt(d[ch].m[m.key], m.kind)}<div class="sub">${pct(d[ch].wow[m.key])}</div></td>`;
+      }
+    }
+    h += '</tr>';
+  }
+  h += '</tbody></table>';
+  el.innerHTML = h;
+}
+
+// coupon render: per-channel top-7 tables for a given day object
+function couponBlock(day) {
+  const mk = ch => {
+    let trs = '';
+    day.coupons[ch].slice(0, 7).forEach((c, i) => {
+      trs += `<tr><td class="rank">${i+1}</td><td class="cpn">${c.coupon}</td><td class="num">${c.orders.toLocaleString('en-IN')}</td><td class="num">₹${c.burn.toLocaleString('en-IN',{maximumFractionDigits:0})}</td></tr>`;
+    });
+    if (!trs) trs = '<tr><td colspan="4" class="empty">No coupon orders</td></tr>';
+    return `<div class="coupon-col"><div class="coupon-h ${ch}">${ch.toUpperCase()}</div>
+      <table class="coupon-t"><thead><tr><th>#</th><th>Coupon</th><th>Orders</th><th>Burn (₹)</th></tr></thead><tbody>${trs}</tbody></table></div>`;
+  };
+  return `<div class="coupon-wrap">${mk('swiggy')}${mk('toing')}</div>`;
+}
+
+function fillDaySelect(id, days) {
+  const sel = document.getElementById(id);
+  // options listed latest-first; option value = index into `days` (chronological)
+  sel.innerHTML = days.map((d, i) => `<option value="${i}">${d.date}</option>`).reverse().join('');
+  sel.value = String(days.length - 1);  // latest day preselected
+}
+
+function renderCoupons() {
+  const days = DATA.brand;
+  const idx = parseInt(document.getElementById('coupon-day').value);
+  document.getElementById('brand-coupons').innerHTML = couponBlock(days[idx]);
+}
+
+let curOutlet = null;
+function renderOdCoupons() {
+  if (!curOutlet) return;
+  const idx = parseInt(document.getElementById('od-coupon-day').value);
+  document.getElementById('od-coupons').innerHTML = couponBlock(curOutlet.days[idx]);
+}
+
+function openOutlet(rid) {
+  curOutlet = DATA.outlets.find(o => o.rid === rid);
+  document.getElementById('od-title').textContent = `${curOutlet.name} · RID ${curOutlet.rid} · ${curOutlet.area}`;
+  const latest = curOutlet.days[curOutlet.days.length - 1];
+  renderKpis('od-kpis', latest.total, 'Total');
+  renderTable('od-table', curOutlet.days);
+  fillDaySelect('od-coupon-day', curOutlet.days);
+  renderOdCoupons();
+  document.getElementById('outlet-detail').style.display = 'block';
+  document.getElementById('outlet-detail').scrollIntoView({behavior:'smooth'});
+}
+
+function setView(v) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.view === v));
+  document.getElementById('view-brand').style.display = v === 'brand' ? '' : 'none';
+  document.getElementById('view-outlet').style.display = v === 'outlet' ? '' : 'none';
+}
+
+// ---- charts (inline SVG, no deps) ----
+function lineChart(elId, labels, seriesArr, yFmt) {
+  const el = document.getElementById(elId);
+  const W = el.clientWidth || 900, H = 260, P = {l:56, r:14, t:14, b:30};
+  const n = labels.length;
+  const all = seriesArr.flatMap(s => s.data);
+  const max = Math.max(...all, 1), min = 0;
+  const x = i => P.l + i * (W - P.l - P.r) / Math.max(n - 1, 1);
+  const y = v => P.t + (1 - (v - min) / (max - min)) * (H - P.t - P.b);
+  let g = '';
+  // gridlines
+  for (let i = 0; i <= 4; i++) {
+    const v = min + (max - min) * i / 4;
+    g += `<line x1="${P.l}" y1="${y(v)}" x2="${W-P.r}" y2="${y(v)}" stroke="var(--line)" stroke-width="1"/>
+          <text x="${P.l-6}" y="${y(v)+4}" text-anchor="end" font-size="10" fill="var(--ink2)">${yFmt(v)}</text>`;
+  }
+  // x labels
+  labels.forEach((lb, i) => {
+    if (i % 2 === 0) g += `<text x="${x(i)}" y="${H-8}" text-anchor="middle" font-size="10" fill="var(--ink2)">${lb}</text>`;
+  });
+  for (const s of seriesArr) {
+    const pts = s.data.map((v, i) => `${x(i)},${y(v)}`).join(' ');
+    g += `<polyline points="${pts}" fill="none" stroke="${s.color}" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"/>`;
+    s.data.forEach((v, i) => {
+      g += `<circle cx="${x(i)}" cy="${y(v)}" r="3" fill="${s.color}"><title>${labels[i]} ${s.name}: ${yFmt(v)}</title></circle>`;
+    });
+  }
+  el.innerHTML = `<svg width="100%" viewBox="0 0 ${W} ${H}">${g}</svg>`;
+}
+
+function renderCharts() {
+  const days = DATA.brand;
+  const labels = days.map(d => d.date.slice(5));
+  const F = v => v >= 1000 ? (v/1000).toFixed(1) + 'k' : v.toFixed(0);
+  lineChart('chart-orders', labels, [
+    {name:'Swiggy', color:'#FC8019', data: days.map(d => d.swiggy.m.orders)},
+    {name:'Toing', color:'#7C4DFF', data: days.map(d => d.toing.m.orders)},
+    {name:'Total', color:'#1A73E8', data: days.map(d => d.total.m.orders)},
+  ], F);
+  lineChart('chart-gmv', labels, [
+    {name:'GMV Swiggy', color:'#FC8019', data: days.map(d => d.swiggy.m.gmv)},
+    {name:'GMV Toing', color:'#7C4DFF', data: days.map(d => d.toing.m.gmv)},
+    {name:'GMV Total', color:'#1A73E8', data: days.map(d => d.total.m.gmv)},
+  ], v => '₹' + F(v));
+}
+
+// ---- init ----
+(function init() {
+  const days = DATA.brand;
+  const latest = days[days.length - 1];
+  document.getElementById('latest-date').textContent = latest.date;
+  renderKpis('brand-kpis', latest.total, 'Total');
+  renderTable('brand-table', days);
+  fillDaySelect('coupon-day', days);
+  renderCoupons();
+  renderCharts();
+
+  const grid = document.getElementById('outlet-grid');
+  grid.innerHTML = DATA.outlets.map(o => `
+    <button class="outlet-btn" onclick="openOutlet(${o.rid})">
+      <div class="n">${o.name}</div>
+      <div class="a">RID ${o.rid} · ${o.area}</div>
+      <div class="s">${Math.round(o.orders).toLocaleString('en-IN')} orders · ₹${Math.round(o.gmv).toLocaleString('en-IN')} GMV</div>
+    </button>`).join('');
+})();
+</script>
+</body>
+</html>
